@@ -1,0 +1,170 @@
+Sub alpha_testing()
+Dim total, maxvol As Double
+Dim pos, frnum, yor, yer As Long
+Dim yoval, yeval, diff, perch As Double
+Dim maxval, minval, mval, nval, vval As Double
+Dim mxnum, mnnum, vnum As Integer
+
+
+
+total = 0
+
+For Each ws In Worksheets
+    pos = 2
+    frnum = 2
+    npos = 2
+    ginc = 0
+    gdec = 0
+    Dim ws_name As String
+    lastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+    ' Grabbed the WorksheetName
+    WorksheetName = ws.Name
+    ' MsgBox WorksheetName
+
+    ' Determine the Last Column Number
+    LastColumn = ws.Cells(1, Columns.Count).End(xlToLeft).Column
+    'MsgBox ("WorksheetName: " & ws.Name & " LastRow: " & LastRow & " LastColumn: " & LastColumn)
+    
+   ' For i = 2 To LastRow
+       ' total = total + Cells(i, LastColumn).Value
+        
+    'Next i
+    For r = 2 To lastRow
+        ws.Cells(1, 9).Value = "Ticker"
+        ticker = ws.Cells(r, 1).Value
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        If ws.Cells(r + 1, 1).Value <> ws.Cells(r, 1).Value Then
+            
+            ws.Cells(pos, 9).Value = ticker
+            total = total + ws.Cells(r, 7).Value
+            ws.Cells(pos, 12).Value = total
+            
+            total = 0
+            pos = pos + 1
+        ElseIf ws.Cells(r + 1, 1).Value = ws.Cells(r, 1).Value Then
+            
+            total = total + ws.Cells(r, 7).Value
+            
+        End If
+     Next r
+    
+    For r = 2 To lastRow
+    ws.Cells(1, 13).Value = "First Occurence"
+    ticker = ws.Cells(r, 1).Value
+    Set FoundCell = ws.Range("A:A").Find(What:=ticker)
+                
+            If Not FoundCell Is Nothing Then
+                'MsgBox (ticker & " found in row: " & FoundCell.Row)
+                'ws.Cells(frnum, 11).Value = FoundCell.Row
+                If ws.Cells(r, 1).Value <> ws.Cells(r + 1, 1).Value Then
+                    'MsgBox ("found" & frnum)
+                    ws.Cells(frnum, 13).Value = FoundCell.Row
+                    frnum = frnum + 1
+                End If
+                
+                'MsgBox ("FoundCell.Row : " & FoundCell.Row)
+            End If
+    Next r
+    
+   lastrow_fo = ws.Cells(Rows.Count, 13).End(xlUp).Row
+   
+   For r = 2 To lastrow_fo
+   ws.Cells(1, 14).Value = "Last Occurence"
+        If ws.Cells(r + 1, 13).Value <> ws.Cells(r, 13).Value Then
+            ws.Cells(npos, 14).Value = ws.Cells(r + 1, 13).Value - 1
+            npos = npos + 1
+        End If
+    Next r
+    
+    For r = 2 To lastrow_fo
+    rval = ws.Cells(r, 14).Value
+            'MsgBox ("ws.Cells(npos, 16).Value" & ws.Cells(npos, 16).Value)
+            If rval = -1 Then
+                ws.Cells(r, 14).Value = lastRow
+            End If
+    Next r
+
+For r = 2 To lastrow_fo
+    ws.Cells(1, 10).Value = "Yearly Change"
+    ws.Cells(1, 11).Value = "Percent Change"
+    
+    yor = ws.Cells(r, 13).Value
+    yer = ws.Cells(r, 14).Value
+    yoval = ws.Cells(yor, 3).Value
+    yeval = ws.Cells(yer, 6).Value
+    diff = yoval - yeval
+    perch = (diff * 100) / yoval
+    ws.Cells(r, 10).Value = diff
+    ws.Cells(r, 11).Value = perch
+    
+    If ws.Cells(r, 10).Value < 0 Then
+        ws.Cells(r, 10).Interior.Color = vbRed
+    Else
+        ws.Cells(r, 10).Interior.Color = vbGreen
+    End If
+    
+    ws.Cells(r, 11).NumberFormat = "0.00%"
+    ws.Cells(r, 11).Value = ws.Cells(r, 11).Value / 100
+Next r
+
+
+    ws.Cells(2, 17).Value = "Greatest % Increase"
+    ws.Cells(3, 17).Value = "Greatest % Decrease"
+    ws.Cells(4, 17).Value = "Greatest Total Volume"
+    ws.Cells(1, 18).Value = "Ticker"
+    ws.Cells(1, 19).Value = "Value"
+    
+'finding Max % change and row num
+maxval = ws.Cells(2, 11).Value * 100
+mxnum = 2
+For r = 2 To lastrow_fo
+    mval = ws.Cells(r + 1, 11).Value * 100
+    If mval > maxval Then
+        maxval = mval
+        mxnum = r + 1
+    End If
+Next r
+'MsgBox ("Max value =" & maxval)
+'MsgBox ("mxnum =" & mxnum)
+ws.Cells(2, 19).Value = maxval
+ws.Cells(2, 18).Value = ws.Cells(mxnum, 9)
+
+'finding Min % and row num
+minval = ws.Cells(2, 11).Value * 100
+mnnum = 2
+For r = 2 To lastrow_fo
+    nval = ws.Cells(r + 1, 11).Value * 100
+    If nval < minval Then
+        minval = nval
+        mnnum = r + 1
+    End If
+Next r
+'MsgBox ("Min value =" & minval)
+'MsgBox ("mnnum =" & mnnum)
+ws.Cells(3, 19).Value = minval
+ws.Cells(3, 18).Value = ws.Cells(mnnum, 9)
+
+'finding Max ticker volume and row num
+maxvol = ws.Cells(2, 12).Value
+vnum = 2
+For r = 2 To lastrow_fo
+    vval = ws.Cells(r + 1, 12).Value
+    If vval > maxvol Then
+        maxvol = vval
+        vnum = r + 1
+    End If
+Next r
+'MsgBox ("Max Volume =" & maxvol)
+'MsgBox ("vnum =" & vnum)
+ws.Cells(4, 19).Value = maxvol
+ws.Cells(4, 18).Value = ws.Cells(vnum, 9)
+
+
+
+Next ws
+
+End Sub
+
+
+
