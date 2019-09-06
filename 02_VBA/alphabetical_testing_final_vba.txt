@@ -1,170 +1,333 @@
-Sub alpha_testing()
-Dim total, maxvol As Double
-Dim pos, frnum, yor, yer As Long
-Dim yoval, yeval, diff, perch As Double
-Dim maxval, minval, mval, nval, vval As Double
-Dim mxnum, mnnum, vnum As Integer
+Homework Assignment 2 - MS Excel VBA
 
+'Details:
+'For this VBA Assignment, we were to create a VBA Script that could be applied accross all worksheets in a workbook
+'There are three scripts below for the easy, moderate, and hard tasks for the mock stock market data.
+'The "asks" are the objectives that are described before each respective part.
 
+'Homework Submission for the easy, moderate, and hard sections begins below:
 
-total = 0
-
-For Each ws In Worksheets
-    pos = 2
-    frnum = 2
-    npos = 2
-    ginc = 0
-    gdec = 0
-    Dim ws_name As String
-    lastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
-
-    ' Grabbed the WorksheetName
-    WorksheetName = ws.Name
-    ' MsgBox WorksheetName
-
-    ' Determine the Last Column Number
-    LastColumn = ws.Cells(1, Columns.Count).End(xlToLeft).Column
-    'MsgBox ("WorksheetName: " & ws.Name & " LastRow: " & LastRow & " LastColumn: " & LastColumn)
+sub easy()
+'THE ASK:
+    'create a loop through each year of stock data and grab the total amount of volume each stock had over the year
+    'You will also need to display the ticker symbol to coincide with the total volume.
     
-   ' For i = 2 To LastRow
-       ' total = total + Cells(i, LastColumn).Value
-        
-    'Next i
-    For r = 2 To lastRow
-        ws.Cells(1, 9).Value = "Ticker"
-        ticker = ws.Cells(r, 1).Value
-        ws.Cells(1, 12).Value = "Total Stock Volume"
-        If ws.Cells(r + 1, 1).Value <> ws.Cells(r, 1).Value Then
+    'first we need to set up the loops thru all WORKSHEETS
+        For Each ws In Worksheets
             
-            ws.Cells(pos, 9).Value = ticker
-            total = total + ws.Cells(r, 7).Value
-            ws.Cells(pos, 12).Value = total
+            'Created a variable to hold the ticker, total stk volume, and lastrow of each wksht
+            Dim ticker As String
+            Dim totalstkvol As Double            
             
-            total = 0
-            pos = pos + 1
-        ElseIf ws.Cells(r + 1, 1).Value = ws.Cells(r, 1).Value Then
+            ws.Cells(1, 9).Value = "Ticker Symbol"
+            ws.Cells(1, 10).Value = "Total Stock Volume"
             
-            total = total + ws.Cells(r, 7).Value
+            totalstkvol = 0
             
-        End If
-     Next r
-    
-    For r = 2 To lastRow
-    ws.Cells(1, 13).Value = "First Occurence"
-    ticker = ws.Cells(r, 1).Value
-    Set FoundCell = ws.Range("A:A").Find(What:=ticker)
-                
-            If Not FoundCell Is Nothing Then
-                'MsgBox (ticker & " found in row: " & FoundCell.Row)
-                'ws.Cells(frnum, 11).Value = FoundCell.Row
-                If ws.Cells(r, 1).Value <> ws.Cells(r + 1, 1).Value Then
-                    'MsgBox ("found" & frnum)
-                    ws.Cells(frnum, 13).Value = FoundCell.Row
-                    frnum = frnum + 1
+            Dim SummaryTableTick As Integer
+            SummaryTableTick = 2
+            
+            lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+            
+            'setting up the for loop and conditionals
+            For Row = 2 To lastrow
+            
+                If ws.Cells(Row + 1, 1).Value <> ws.Cells(Row, 1).Value Then
+                    
+                    'Set the ticker Name
+                    ticker = ws.Cells(Row, 1).Value
+                    
+                    'Add to volume total
+                    totalstkvol = totalstkvol + ws.Cells(Row, 7).Value
+                    
+                    'Print ticker Name in the Summary Table
+                    ws.Range("I" & SummaryTableTick).Value = ticker
+                    
+                    'Print the TotalStkVol to the Summary Table
+                    ws.Range("J" & SummaryTableTick).Value = totalstkvol
+                    
+                    'add one to the summary table row
+                    SummaryTableTick = SummaryTableTick + 1
+                    
+                    'reset the totalstkvol back to zero
+                    totalstkvol = 0
+                    
+                Else
+                    totalstkvol = totalstkvol + ws.Cells(Row, 7).Value
+            
                 End If
+            
+            Next Row
+        
+        Next ws
+        
+End Sub
+------------------------------------------------------------------
+
+Sub Moderate()
+
+    'THE ASK:
+        'Create a script that will loop through all the stocks and take the following info.
+            'Yearly change from what the stock opened the year at to what the closing price was.
+            'The percent change from the what it opened the year at to what it closed.
+            'The total Volume of the stock
+            'ticker Symbol
+            'You should also have conditional formatting that will highlight positive
+            'change in green and negative change in red.
+
+    
+'Set up the loops thru all WORKSHEETS
+    For Each ws In Worksheets
+        
+        'Declare all variables and define them
+        Dim ticker As String
+        Dim total_open_price As Double
+        Dim total_close_price As Double
+        Dim yearly_change As Double
+        Dim per_change As Double
+        Dim summarypos As Integer
+        
+        'define the variables within each wksht
+        totalstkvol = 0
+        total_open_price = 0
+        total_close_price = 0
+        summarypos = 2
+        
+        'Set up column headers
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Yearly Change"
+        ws.Cells(1, 11).Value = "Percent Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        
+        lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+        'setting up the for loop and conditionals
+        For Row = 2 To lastrow
+        
+            If ws.Cells(Row + 1, 1).Value <> ws.Cells(Row, 1).Value Then
                 
-                'MsgBox ("FoundCell.Row : " & FoundCell.Row)
+                'Set the ticker Name
+                ticker = ws.Cells(Row, 1).Value
+                
+                'Add to totals for: total_open_price, total_close_price, totalstkvol
+                
+                total_open_price = total_open_price + ws.Cells(Row, 3).Value
+                total_close_price = total_close_price + ws.Cells(Row, 6).Value
+                total_yearly_change = (total_close_price - total_open_price)
+                totalstkvol = totalstkvol + ws.Cells(Row, 7).Value
+                
+                'Print Ticker Name in the Summary Table
+                ws.Range("I" & summarypos).Value = ticker
+                
+                'Print "YEARLY CHANGE" to Summary Table
+                ws.Range("J" & summarypos).Value = total_yearly_change
+                
+                    'setting up condition that if the total yearly change is positive color the interior green
+                    'otherwise if negative, color the interior red
+                    If (total_yearly_change > 0) Then
+                        ws.Range("J" & summarypos).Interior.ColorIndex = 4
+                    ElseIf (total_yearly_change = 0) Then
+                        ws.Range("J" & summarypos).Interior.ColorIndex = 2
+                    Else
+                        ws.Range("J" & summarypos).Interior.ColorIndex = 3
+                    End If
+                    
+                    'Total PERCENT CHANGE - Need to account for If total_yearly_change = 0 (will cause an error)
+                    If (total_yearly_change = 0) Then
+                        ws.Range("K" & summarypos).Value = 0
+                    Else
+                    
+                      'Print "Percent Change" to Summary Table = (totalcloseprice - totalopenprice)/ totalopenprice)
+                        ws.Range("K" & summarypos).Value = (total_yearly_change / total_open_price) * 100
+                        
+                        'Change format for Total Percentage Change to Percent style
+                        ws.Range("K" & summarypos).Style = "Percent"
+                    End If
+                    
+                   
+                'Print the totalstkvol to the Summary Table
+                ws.Range("L" & summarypos).Value = totalstkvol
+                
+                'add one to the summary table row
+                summarypos = summarypos + 1
+                
+                'reset the totalstkvol back to zero
+                totalstkvol = 0
+                
+            'Else the tickers from one cell below to the cell above are equal, then continue
+            'to sum up the following:
+            Else
+                total_open_price = total_open_price + ws.Cells(Row, 3).Value
+                total_close_price = total_close_price + ws.Cells(Row, 6).Value
+                totalstkvol = totalstkvol + ws.Cells(Row, 7).Value
+                
             End If
-    Next r
+        
+        Next Row
+        
+    Next ws
     
-   lastrow_fo = ws.Cells(Rows.Count, 13).End(xlUp).Row
-   
-   For r = 2 To lastrow_fo
-   ws.Cells(1, 14).Value = "Last Occurence"
-        If ws.Cells(r + 1, 13).Value <> ws.Cells(r, 13).Value Then
-            ws.Cells(npos, 14).Value = ws.Cells(r + 1, 13).Value - 1
-            npos = npos + 1
-        End If
-    Next r
-    
-    For r = 2 To lastrow_fo
-    rval = ws.Cells(r, 14).Value
-            'MsgBox ("ws.Cells(npos, 16).Value" & ws.Cells(npos, 16).Value)
-            If rval = -1 Then
-                ws.Cells(r, 14).Value = lastRow
-            End If
-    Next r
-
-For r = 2 To lastrow_fo
-    ws.Cells(1, 10).Value = "Yearly Change"
-    ws.Cells(1, 11).Value = "Percent Change"
-    
-    yor = ws.Cells(r, 13).Value
-    yer = ws.Cells(r, 14).Value
-    yoval = ws.Cells(yor, 3).Value
-    yeval = ws.Cells(yer, 6).Value
-    diff = yoval - yeval
-    perch = (diff * 100) / yoval
-    ws.Cells(r, 10).Value = diff
-    ws.Cells(r, 11).Value = perch
-    
-    If ws.Cells(r, 10).Value < 0 Then
-        ws.Cells(r, 10).Interior.Color = vbRed
-    Else
-        ws.Cells(r, 10).Interior.Color = vbGreen
-    End If
-    
-    ws.Cells(r, 11).NumberFormat = "0.00%"
-    ws.Cells(r, 11).Value = ws.Cells(r, 11).Value / 100
-Next r
-
-
-    ws.Cells(2, 17).Value = "Greatest % Increase"
-    ws.Cells(3, 17).Value = "Greatest % Decrease"
-    ws.Cells(4, 17).Value = "Greatest Total Volume"
-    ws.Cells(1, 18).Value = "Ticker"
-    ws.Cells(1, 19).Value = "Value"
-    
-'finding Max % change and row num
-maxval = ws.Cells(2, 11).Value * 100
-mxnum = 2
-For r = 2 To lastrow_fo
-    mval = ws.Cells(r + 1, 11).Value * 100
-    If mval > maxval Then
-        maxval = mval
-        mxnum = r + 1
-    End If
-Next r
-'MsgBox ("Max value =" & maxval)
-'MsgBox ("mxnum =" & mxnum)
-ws.Cells(2, 19).Value = maxval
-ws.Cells(2, 18).Value = ws.Cells(mxnum, 9)
-
-'finding Min % and row num
-minval = ws.Cells(2, 11).Value * 100
-mnnum = 2
-For r = 2 To lastrow_fo
-    nval = ws.Cells(r + 1, 11).Value * 100
-    If nval < minval Then
-        minval = nval
-        mnnum = r + 1
-    End If
-Next r
-'MsgBox ("Min value =" & minval)
-'MsgBox ("mnnum =" & mnnum)
-ws.Cells(3, 19).Value = minval
-ws.Cells(3, 18).Value = ws.Cells(mnnum, 9)
-
-'finding Max ticker volume and row num
-maxvol = ws.Cells(2, 12).Value
-vnum = 2
-For r = 2 To lastrow_fo
-    vval = ws.Cells(r + 1, 12).Value
-    If vval > maxvol Then
-        maxvol = vval
-        vnum = r + 1
-    End If
-Next r
-'MsgBox ("Max Volume =" & maxvol)
-'MsgBox ("vnum =" & vnum)
-ws.Cells(4, 19).Value = maxvol
-ws.Cells(4, 18).Value = ws.Cells(vnum, 9)
-
-
-
-Next ws
-
 End Sub
 
+-----------------------------------------------------------------------------
 
+Sub hard()
 
+'THE ASK:
+
+'Your solution will include everything from the moderate challenge.
+'Your solution will also be able to locate the stock with the:
+'"Greatest % increase", "Greatest % Decrease" and "Greatest total volume".
+
+'first we need to set up the loops thru all WORKSHEETS
+For Each ws In Worksheets
+        
+ 'Declare all variables and define them
+ 
+        Dim ticker As String
+        Dim total_open_price As Double
+        Dim total_close_price As Double
+        Dim yearly_change As Double
+        Dim per_change As Double
+        Dim summarypos As Integer
+        
+        'define the variables within each wksht
+        totalstkvol = 0
+        total_open_price = 0
+        total_close_price = 0
+        summarypos = 2
+        
+        'Set up column headers
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Yearly Change"
+        ws.Cells(1, 11).Value = "Percent Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        
+        lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+        'setting up the for loop and conditionals
+        For Row = 2 To lastrow
+        
+            If ws.Cells(Row + 1, 1).Value <> ws.Cells(Row, 1).Value Then
+                
+                'Set the ticker Name
+                ticker = ws.Cells(Row, 1).Value
+                
+                'Add to totals for: total_open_price, total_close_price, totalstkvol
+                
+                total_open_price = total_open_price + ws.Cells(Row, 3).Value
+                total_close_price = total_close_price + ws.Cells(Row, 6).Value
+                total_yearly_change = (total_open_price - total_close_price)
+                totalstkvol = totalstkvol + ws.Cells(Row, 7).Value
+                
+                'Print Ticker Name in the Summary Table
+                ws.Range("I" & summarypos).Value = ticker
+                
+                'Print "YEARLY CHANGE" to Summary Table
+                ws.Range("J" & summarypos).Value = total_yearly_change
+                
+                    'setting up condition that if the total yearly change is positive color the interior green
+                    'otherwise if negative, color the interior red
+                    If (total_yearly_change > 0) Then
+                        ws.Range("J" & summarypos).Interior.ColorIndex = 4
+                    ElseIf (total_yearly_change = 0) Then
+                        ws.Range("J" & summarypos).Interior.ColorIndex = 2
+                    Else
+                        ws.Range("J" & summarypos).Interior.ColorIndex = 3
+                    End If
+                    
+                    per_change = (total_yearly_change * 100) / total_open_price
+                    
+                    'Total PERCENT CHANGE - Need to account for If total_yearly_change = 0 (will cause an error)
+                    If (total_yearly_change = 0) Then
+                        ws.Range("K" & summarypos).Value = 0
+                    Else
+                    
+                      'Print "Percent Change" to Summary Table = (totalcloseprice - totalopenprice)/ totalopenprice)
+                        ws.Range("K" & summarypos).Value = per_change
+                        
+                        'Change format for Total Percentage Change to Percent style
+                        ws.Range("K" & summarypos).NumberFormat = "0.00%"
+                        ws.Range("K" & summarypos).Value = ws.Range("K" & summarypos).Value / 100
+                        'ws.Range("K" & summarypos).Style = "Percent"
+                    End If
+                    
+                   
+                'Print the totalstkvol to the Summary Table
+                ws.Range("L" & summarypos).Value = totalstkvol
+                
+                'add one to the summary table row
+                summarypos = summarypos + 1
+                
+                'reset the totalstkvol back to zero
+                totalstkvol = 0
+                
+            'Else the tickers from one cell below to the cell above are equal, then continue
+            'to sum up the following:
+            Else
+                total_open_price = total_open_price + ws.Cells(Row, 3).Value
+                total_close_price = total_close_price + ws.Cells(Row, 6).Value
+                totalstkvol = totalstkvol + ws.Cells(Row, 7).Value
+                
+            End If
+        
+        Next Row
+            
+         'set up SummaryTableGreatest
+                
+        ws.Cells(1, 16).Value = "Ticker"
+        ws.Cells(1, 17).Value = "Value"
+        ws.Cells(2, 15).Value = "Greatest % Increase"
+        ws.Cells(3, 15).Value = "Greatest % Decrease"
+        ws.Cells(4, 15).Value = "Greatest Total Volume"
+        
+        'define the max and min variables for the percent change
+        Dim Max As Double
+        Dim Min As Double
+
+        Max = Application.WorksheetFunction.Max(ws.Columns(11))
+        Min = Application.WorksheetFunction.Min(ws.Columns(11))
+       
+        
+        lastrowPercent = ws.Cells(Rows.Count, 11).End(xlUp).Row
+
+        'new loop for returning greatest % increase and decrease
+        'and total vol
+        For r = 2 To lastrowPercent
+                
+                'set up max function for percentage change
+                If (ws.Cells(r, 11).Value = Max) Then
+                    ws.Cells(2, 16).Value = ws.Cells(r, 9).Value
+                    ws.Cells(2, 17).Value = Max
+                    'ws.Cells(2, 17).NumberFormat = "0.00%"
+                    'ws.Cells(2, 17).Value = ws.Cells(2, 17).Value / 100
+                    'ws.Cells(2, 17).Style = "Percent"
+                
+                'set up min function for percentage change
+                ElseIf (ws.Cells(r, 11).Value = Min) Then
+                    ws.Cells(3, 16).Value = ws.Cells(r, 9).Value
+                    ws.Cells(3, 17).Value = Min
+                    'ws.Cells(3, 17).NumberFormat = "0.00%"
+                    'ws.Cells(3, 17).Value = ws.Cells(3, 17).Value / 100
+                    'ws.Cells(3, 17).Style = "Percent"
+                
+                End If
+        Next r
+                    
+                    
+         MaxTotalVol = Application.WorksheetFunction.Max(ws.Columns(12))
+         lastrowMaxVol = ws.Cells(Rows.Count, 12).End(xlUp).Row
+         
+        'Start a new loop for TotalMaxVolume
+        For r = 2 To lastrowMaxVol
+                 
+            If (ws.Cells(r, 12).Value = MaxTotalVol) Then
+                ws.Cells(4, 16).Value = ws.Cells(r, 9).Value
+                ws.Cells(4, 17).Value = ws.Cells(r, 12).Value
+            End If
+                 
+        Next r
+            
+    Next ws
+    
+End Sub
